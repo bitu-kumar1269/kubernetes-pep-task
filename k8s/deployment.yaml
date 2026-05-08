@@ -1,52 +1,50 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
- name: auth-deployment
- namespace: default
+  name: auth-deployment
+  namespace: default
+
 spec:
- replicas: 1
+  replicas: 1
+
   selector:
-   matchLabels:
-  app: auth-pod
+    matchLabels:
+      app: auth-pod
 
+  template:
+    metadata:
+      labels:
+        app: auth-pod
 
- template:
-   metadata:
-     labels:
-       app: auth-pod
+    spec:
+      containers:
+        - name: auth-container
+          image: 375474427696.dkr.ecr.eu-north-1.amazonaws.com/kubernetes-task:latest
+          imagePullPolicy: IfNotPresent
 
+          ports:
+            - containerPort: 3000
 
-   spec:
-     containers:
-       - name: auth-container
-         image: 375474427696.dkr.ecr.eu-north-1.amazonaws.com/kubernetes-task:latest
-         imagePullPolicy: IfNotPresent   # better for faster startup
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "10m"
 
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
 
-         ports:
-           - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
 
-
-         resources:
-           requests:
-             memory: "64Mi"
-             cpu: "10m"
-           limits:
-             memory: "128Mi"
-             cpu: "100m"
-
-
-         livenessProbe:
-           httpGet:
-             path: /health
-             port: 3000
-           initialDelaySeconds: 30
-           periodSeconds: 10
-
-
-         readinessProbe:
-           httpGet:
-             path: /health
-             port: 3000
-           initialDelaySeconds: 10
-           periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
